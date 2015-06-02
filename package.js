@@ -30,6 +30,8 @@ Package.onUse(function (api) {
   api.export('TwitterBlock', ['client', 'server']);
   api.export('LinkBlock', ['client', 'server']);
   api.export('newTypeSpecificContextBlock', ['client', 'server']);
+  api.export('Schema', ['client', 'server']);
+  api.export('ContextBlocks', ['client', 'server']);
 });
 
 function configure(api) {
@@ -50,7 +52,8 @@ function configure(api) {
 
 
   api.addFiles([
-    'lib/models.js'
+    'lib/models.js',
+    'lib/collections.js'
   ], ['client', 'server']);
 
   api.addFiles([
