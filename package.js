@@ -36,7 +36,6 @@ Package.onUse(function (api) {
 
 function configure(api) {
   api.versionsFrom('METEOR@1.1.0.1');
-  api.use('aldeed:autoform@5.1.0');
   api.use('aldeed:collection2@2.3.0')
   api.use('chaosbohne:twitter-text@0.1.0');
   api.use('lepozepo:cloudinary@3.0.0');
