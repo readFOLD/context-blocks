@@ -10,6 +10,29 @@ var VIMEO_API_KEY = Meteor.settings.VIMEO_API_KEY;
 var VIMEO_API_SECRET = Meteor.settings.VIMEO_API_SECRET;
 var VIMEO_ACCESS_TOKEN = Meteor.settings.VIMEO_ACCESS_TOKEN;
 
+var makeTwitterCall = function(apiCall, params) {
+  var res;
+  var user = Meteor.user();
+  var client = new Twit({
+    consumer_key: TWITTER_API_KEY,
+    consumer_secret: TWITTER_API_SECRET,
+    access_token: user.services.twitter.accessToken,
+    access_token_secret: user.services.twitter.accessTokenSecret
+  });
+
+  var twitterResultsSync = Meteor.wrapAsync(client.get, client);
+  try {
+    res = twitterResultsSync(apiCall, params);
+  }
+  catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
+    res = {};
+  }
+  return res;
+};
+
 Meteor.methods({
 
   ///////////////////////////////////
@@ -394,9 +417,17 @@ Meteor.methods({
     requestParams = {
       part: 'snippet',
       q: query,
+      type: 'video',
+      videoEmbeddable: 'true',
       maxResults: 50,
       key: GOOGLE_API_SERVER_KEY
     };
+
+    if (option === 'live'){
+      requestParams['eventType'] = 'live';
+      requestParams['safeSearch'] = 'none';
+    }
+
     if (page) {
       requestParams['pageToken'] = page;
     }
