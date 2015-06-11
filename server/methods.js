@@ -10,6 +10,31 @@ var VIMEO_API_KEY = Meteor.settings.VIMEO_API_KEY;
 var VIMEO_API_SECRET = Meteor.settings.VIMEO_API_SECRET;
 var VIMEO_ACCESS_TOKEN = Meteor.settings.VIMEO_ACCESS_TOKEN;
 
+
+var Twit = Meteor.npmRequire('twit');
+var Vimeo = Meteor.npmRequire('vimeo-api').Vimeo;
+
+if (!GOOGLE_API_SERVER_KEY) {
+  console.error('Settings must be loaded for apis to work');
+  throw new Meteor.Error('Settings must be loaded for apis to work');
+}
+
+var decrementByOne = function(bigInt) {
+  var intArr = bigInt.split("");
+  if (intArr.length === 1) {
+    return (intArr[0] -1).toString()
+  }
+
+  var result = [],
+      borrow = 0;
+  for (var i=intArr.length ; i--;) {
+    var temp = intArr[i] - borrow - (i === intArr.length -1 ? 1 :0) ;
+    borrow = temp < 0 ? 1 : 0;
+    result.unshift(((borrow * 10) + temp).toString());
+  }
+  return result.join("")
+};
+
 var makeTwitterCall = function(apiCall, params) {
   var res;
   var user = Meteor.user();
@@ -127,7 +152,7 @@ Meteor.methods({
   },
   imgurImageSearchList: function (query, option, page) {
     var res;
-    var fullSearchItems
+    var fullSearchItems;
     check(query, String);
     this.unblock();
     var nextPage;
