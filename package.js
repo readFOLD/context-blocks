@@ -3,7 +3,7 @@ var fs = Npm.require('fs');
 
 Package.describe({
   "summary": "Search APIs and add context",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "git": "https://github.com/readFOLD/context-blocks",
   "name": "fold:context-blocks"
 });
@@ -29,6 +29,7 @@ Package.onUse(function (api) {
   api.export('VizBlock', ['client', 'server']);
   api.export('TwitterBlock', ['client', 'server']);
   api.export('LinkBlock', ['client', 'server']);
+  api.export('NewsBlock', ['client', 'server']);
   api.export('newTypeSpecificContextBlock', ['client', 'server']);
   api.export('Schema', ['client', 'server']);
   api.export('ContextBlocks', ['client', 'server']);

@@ -374,10 +374,27 @@ Meteor.methods({
       url: query,
       key: EMBEDLY_KEY,
       maxheight: 300,
-      maxwidth: 474
+      maxwidth: 474 // TODO update for deepstream
     };
 
     res = HTTP.get('http://api.embed.ly/1/oembed', {
+      params: requestParams
+    });
+    return res.data;
+  },
+  embedlyExtractResult: function (query) {
+    var res, requestParams;
+    check(query, String);
+    this.unblock();
+
+    requestParams = {
+      url: query,
+      key: EMBEDLY_KEY,
+      maxheight: 300,
+      maxwidth: 474 // TODO update for deepstream
+    };
+
+    res = HTTP.get('http://api.embed.ly/1/extract', {
       params: requestParams
     });
     return res.data;
