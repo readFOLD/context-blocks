@@ -1,3 +1,4 @@
+var BAMBUSER_API_KEY = Meteor.settings.BAMBUSER_API_KEY;
 var GOOGLE_API_SERVER_KEY = Meteor.settings.GOOGLE_API_SERVER_KEY;
 var SOUNDCLOUD_CLIENT_ID = Meteor.settings.SOUNDCLOUD_CLIENT_ID;
 var IMGUR_CLIENT_ID = Meteor.settings.IMGUR_CLIENT_ID;
@@ -497,5 +498,49 @@ Meteor.methods({
       'nextPage': nextPageToken,
       'items': items
     }
+  },
+  bambuserVideoSearchList: function (query, option, page) {
+    var res;
+    var nextPageToken;
+    check(query, String);
+    this.unblock();
+    requestParams = {
+      tag: query.replace(' ', ','),
+      type: 'live', // or archived. default is both
+      limit: 10,
+      api_key: BAMBUSER_API_KEY
+      // username,
+      // max_age,
+      // geo_distace/lat/lon
+    };
+
+
+    page = page || 0;
+
+    if (page) {
+      requestParams['page'] = page;
+    }
+    res = HTTP.get('http://api.bambuser.com/broadcast.json', {
+      params: requestParams
+    });
+
+    console.log('aaaaaaaaaaa')
+    console.log(res)
+
+
+    items = res.data.result;
+
+    if (items.length) {
+      nextPageToken = page + 1;
+      console.log(items[0])
+    } else {
+      nextPageToken = 'end';
+    }
+
+
+    return {
+      'nextPage': nextPageToken,
+      'items': items
+    }
   }
-})
+});

@@ -40,6 +40,8 @@ function configure(api) {
   api.use('aldeed:collection2@2.3.0')
   api.use('chaosbohne:twitter-text@0.1.0');
   api.use('lepozepo:cloudinary@3.0.0');
+  api.use('check');
+  api.use('http');
   //meteorhacks:npm                    1.3.0  Use npm modules with your Meteor App
   //mystor:device-detection            0.2.0  Client-Side Device Type Detection & Template Switching with Opti...
   //npm-container                      1.0.0+ Contains all your npm dependencies
