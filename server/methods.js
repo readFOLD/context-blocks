@@ -1,4 +1,5 @@
 var BAMBUSER_API_KEY = Meteor.settings.BAMBUSER_API_KEY;
+var USTREAM_DATA_API_KEY = Meteor.settings.USTREAM_DATA_API_KEY;
 var GOOGLE_API_SERVER_KEY = Meteor.settings.GOOGLE_API_SERVER_KEY;
 var SOUNDCLOUD_CLIENT_ID = Meteor.settings.SOUNDCLOUD_CLIENT_ID;
 var IMGUR_CLIENT_ID = Meteor.settings.IMGUR_CLIENT_ID;
@@ -530,9 +531,50 @@ Meteor.methods({
 
     items = res.data.result;
 
-    if (items.length) {
+    if (items && items.length) {
       nextPageToken = page + 1;
       console.log(items[0])
+    } else {
+      nextPageToken = 'end';
+    }
+
+
+    return {
+      'nextPage': nextPageToken,
+      'items': items
+    }
+  },
+  ustreamVideoSearchList: function (query, option, page) {
+    var res;
+    var nextPageToken;
+    check(query, String);
+    this.unblock();
+    requestParams = {
+      limit: 10,
+      key: USTREAM_DATA_API_KEY
+    };
+
+
+    var kindOfThingToSearch = 'channel'; // channel, user
+    var sortBy = 'popular'; // live, recent
+    var searchString = 'title:like:' + query; // targetProperty:comparison:targetValue or all
+
+    page = page || 1;
+
+    requestParams['page'] = page;
+
+    res = HTTP.get('http://api.ustream.tv/json/' + kindOfThingToSearch + '/' + sortBy + '/search/' + searchString, {
+      params: requestParams
+    });
+
+    //console.log('aaaaaaaaaaa')
+    //console.log(res)
+    console.log('bbbbbbbbbb')
+
+    items = res.data.results;
+
+    if (items && items.length) {
+      nextPageToken = page + 1;
     } else {
       nextPageToken = 'end';
     }
