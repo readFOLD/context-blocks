@@ -60,6 +60,54 @@ var makeTwitterCall = function(apiCall, params) {
   return res;
 };
 
+var searchYouTube = function (query, option, page) {
+  var res;
+  var nextPageToken;
+  check(query, String);
+  this.unblock();
+  requestParams = {
+    part: 'snippet',
+    q: query,
+    type: 'video',
+    videoEmbeddable: 'true',
+    maxResults: 50,
+    key: GOOGLE_API_SERVER_KEY
+  };
+
+  if (option === 'live'){
+    requestParams['eventType'] = 'live';
+    requestParams['safeSearch'] = 'none';
+  }
+
+  if (page) {
+    requestParams['pageToken'] = page;
+  }
+  res = HTTP.get('https://www.googleapis.com/youtube/v3/search', {
+    params: requestParams
+  });
+
+  items = _.chain(res.data.items)
+      .filter(function (element) {
+        return element.id.videoId;
+      })
+      .map(function (element) {
+        element.snippet.videoId = element.id.videoId;
+        return element.snippet;
+      })
+      .value();
+
+  if (items.length) {
+    nextPageToken = res.data.nextPageToken || 'end';
+  } else {
+    nextPageToken = 'end';
+  }
+
+  return {
+    'nextPage': nextPageToken,
+    'items': items
+  }
+};
+
 Meteor.methods({
 
   ///////////////////////////////////
@@ -453,53 +501,14 @@ Meteor.methods({
       'nextPage': nextPage
     };
   },
-  youtubeVideoSearchList: function (query, option, page) {
-    var res;
-    var nextPageToken;
-    check(query, String);
-    this.unblock();
-    requestParams = {
-      part: 'snippet',
-      q: query,
-      type: 'video',
-      videoEmbeddable: 'true',
-      maxResults: 50,
-      key: GOOGLE_API_SERVER_KEY
-    };
-
-    if (option === 'live'){
-      requestParams['eventType'] = 'live';
-      requestParams['safeSearch'] = 'none';
-    }
-
-    if (page) {
-      requestParams['pageToken'] = page;
-    }
-    res = HTTP.get('https://www.googleapis.com/youtube/v3/search', {
-      params: requestParams
+  streamSearchList: function(query, option, page){
+    var results = searchYouTube.apply(this, arguments);
+    _.each(results.items, function(item){
+      _.extend(item, { _source: 'youtube'})
     });
-
-    items = _.chain(res.data.items)
-        .filter(function (element) {
-          return element.id.videoId;
-        })
-        .map(function (element) {
-          element.snippet.videoId = element.id.videoId;
-          return element.snippet;
-        })
-        .value();
-
-    if (items.length) {
-      nextPageToken = res.data.nextPageToken || 'end';
-    } else {
-      nextPageToken = 'end';
-    }
-
-    return {
-      'nextPage': nextPageToken,
-      'items': items
-    }
+    return results
   },
+  youtubeVideoSearchList: searchYouTube,
   bambuserVideoSearchList: function (query, option, page) {
     var res;
     var nextPageToken;
@@ -550,14 +559,14 @@ Meteor.methods({
     check(query, String);
     this.unblock();
     requestParams = {
-      limit: 10,
+      limit: 100,
       key: USTREAM_DATA_API_KEY
     };
 
 
     var kindOfThingToSearch = 'channel'; // channel, user
     var sortBy = 'popular'; // live, recent
-    var searchString = 'title:like:' + query; // targetProperty:comparison:targetValue or all
+    var searchString = 'all'; //'title:like:' + query; // targetProperty:comparison:targetValue or all
 
     page = page || 1;
 
@@ -569,7 +578,6 @@ Meteor.methods({
 
     //console.log('aaaaaaaaaaa')
     //console.log(res)
-    console.log('bbbbbbbbbb')
 
     items = res.data.results;
 

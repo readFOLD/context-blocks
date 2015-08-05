@@ -20,6 +20,7 @@ try {
 Package.onUse(function (api) {
   configure(api);
   api.export('ContextBlock', ['client', 'server']);
+  api.export('Stream', ['client', 'server']);
   api.export('VideoBlock', ['client', 'server']);
   api.export('TextBlock', ['client', 'server']);
   api.export('MapBlock', ['client', 'server']);
