@@ -503,8 +503,14 @@ Meteor.methods({
   },
   streamSearchList: function(query, option, page){
     var youtubeResults;
-    if(!page || page.youtube !== 'end'){
-      youtubeResults = searchYouTube.call(this, query, option, page ? page.youtube : null);
+    if (!page) {
+      page = {
+        ustream: 0
+      }
+    }
+
+    if (page.youtube !== 'end'){
+      youtubeResults = searchYouTube.call(this, query, option, page.youtube || null);
       _.each(youtubeResults.items, function(item){
         _.extend(item, { _source: 'youtube'})
       });
@@ -517,13 +523,14 @@ Meteor.methods({
 
 
 
-
     // ustream
+    var limit = 100;
     var options = {
-      limit: 100,
+      limit: limit,
       sort: {
-        viewersNow: -1
-      }
+        currentViewers: -1
+      },
+      skip: page.ustream * limit
     };
 
     function buildRegExp(query) {
@@ -540,19 +547,44 @@ Meteor.methods({
     ]};
     var ustreams = Streams.find(selector, options).fetch();
 
+
+    // compile nextPage for each source
+
+    var nextPage = {
+      youtube: youtubeResults.nextPage
+    };
+
+    if(ustreams.length){
+      nextPage.ustream = page.ustream + 1;
+    } else {
+      nextPage.ustream = 'end';
+    }
+
+    var allSourcesExhausted = _.chain(nextPage)
+        .values()
+        .uniq()
+        .every(function(v){
+          return v == 'end'
+        })
+        .value();
+
+    if(allSourcesExhausted){
+      nextPage = 'end';
+    }
+
+
+    // mix streams from various sources
+
     var items = _.chain(youtubeResults.items)
         .zip(ustreams)
         .flatten()
         .compact()
         .value();
 
-    console.log(youtubeResults.nextPage)
 
     return {
       items: items,
-      nextPage: {
-        youtube: youtubeResults.nextPage
-      }
+      nextPage: nextPage
     }
   },
   youtubeVideoSearchList: searchYouTube,
@@ -603,7 +635,7 @@ Meteor.methods({
   ustreamVideoSearchList: function (query, option, page) {
     var res;
     var nextPageToken;
-    check(query, String);
+    check(query, Match.Optional(String));
     this.unblock();
     requestParams = {
       limit: 100,
