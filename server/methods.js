@@ -502,11 +502,58 @@ Meteor.methods({
     };
   },
   streamSearchList: function(query, option, page){
-    var results = searchYouTube.apply(this, arguments);
-    _.each(results.items, function(item){
-      _.extend(item, { _source: 'youtube'})
-    });
-    return results
+    var youtubeResults;
+    if(!page || page.youtube !== 'end'){
+      youtubeResults = searchYouTube.call(this, query, option, page ? page.youtube : null);
+      _.each(youtubeResults.items, function(item){
+        _.extend(item, { _source: 'youtube'})
+      });
+    } else { // youtube results are over
+      youtubeResults = {
+        items: [],
+        nextPage: 'end'
+      }
+    }
+
+
+
+
+    // ustream
+    var options = {
+      limit: 100,
+      sort: {
+        viewersNow: -1
+      }
+    };
+
+    function buildRegExp(query) {
+      // this is a dumb implementation
+      var parts = query.trim().split(/[ \-\:]+/);
+      return new RegExp("(" + parts.join('|') + ")", "ig");
+    }
+
+    var regExp = buildRegExp(query);
+    var selector = {$or: [
+      {title: regExp},
+      {description: regExp}
+      //{ $text: { $search: query, $language: 'en' } }
+    ]};
+    var ustreams = Streams.find(selector, options).fetch();
+
+    var items = _.chain(youtubeResults.items)
+        .zip(ustreams)
+        .flatten()
+        .compact()
+        .value();
+
+    console.log(youtubeResults.nextPage)
+
+    return {
+      items: items,
+      nextPage: {
+        youtube: youtubeResults.nextPage
+      }
+    }
   },
   youtubeVideoSearchList: searchYouTube,
   bambuserVideoSearchList: function (query, option, page) {
