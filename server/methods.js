@@ -521,31 +521,37 @@ Meteor.methods({
       }
     }
 
+    var ustreams;
 
+    if(page.ustream !== 'end'){
 
-    // ustream
-    var limit = 100;
-    var options = {
-      limit: limit,
-      sort: {
-        currentViewers: -1
-      },
-      skip: page.ustream * limit
-    };
+      // ustream
+      var limit = 50;
+      var options = {
+        limit: limit,
+        sort: {
+          currentViewers: -1
+        },
+        skip: page.ustream * limit
+      };
 
-    function buildRegExp(query) {
-      // this is a dumb implementation
-      var parts = query.trim().split(/[ \-\:]+/);
-      return new RegExp("(" + parts.join('|') + ")", "ig");
+      function buildRegExp(query) {
+        // this is a dumb implementation
+        var parts = query.trim().split(/[ \-\:]+/);
+        return new RegExp("(" + parts.join('|') + ")", "ig");
+      }
+
+      var regExp = buildRegExp(query);
+      var selector = {$or: [
+        {title: regExp},
+        {description: regExp}
+        //{ $text: { $search: query, $language: 'en' } }
+      ]};
+      ustreams = Streams.find(selector, options).fetch();
+    } else {
+      ustreams = [];
     }
 
-    var regExp = buildRegExp(query);
-    var selector = {$or: [
-      {title: regExp},
-      {description: regExp}
-      //{ $text: { $search: query, $language: 'en' } }
-    ]};
-    var ustreams = Streams.find(selector, options).fetch();
 
 
     // compile nextPage for each source
