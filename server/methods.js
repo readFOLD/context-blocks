@@ -544,7 +544,8 @@ Meteor.methods({
       var regExp = buildRegExp(query);
       var selector = {$or: [
         {title: regExp},
-        {description: regExp}
+        {description: regExp},
+        {username: regExp}
         //{ $text: { $search: query, $language: 'en' } }
       ]};
       ustreams = Streams.find(selector, options).fetch();
