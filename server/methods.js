@@ -510,7 +510,7 @@ Meteor.methods({
     }
 
     if (page.youtube !== 'end'){
-      youtubeResults = searchYouTube.call(this, query, option, page.youtube || null);
+      youtubeResults = searchYouTube.call(this, query, 'live', page.youtube || null);
       _.each(youtubeResults.items, function(item){
         _.extend(item, { _source: 'youtube'})
       });
