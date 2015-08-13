@@ -3,7 +3,7 @@ var fs = Npm.require('fs');
 
 Package.describe({
   "summary": "Search APIs and add context",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "git": "https://github.com/readFOLD/context-blocks",
   "name": "fold:context-blocks"
 });
